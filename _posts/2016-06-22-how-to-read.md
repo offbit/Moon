@@ -80,5 +80,104 @@ for cont, sentiment in zip(data.review, data.sentiment):
     sentences = [sent.lower() for sent in sentences]
     docs.append(sentences)
     sentiments.append(sentiment)
-    
+
 {% endhighlight %}
+
+The next step is to create a our character set.
+
+{% highlight python %}
+for doc in docs:
+    for s in doc:
+        txt += s
+chars = set(txt)
+print('total chars:', len(chars))
+char_indices = dict((c, i) for i, c in enumerate(chars))
+indices_char = dict((i, c) for i, c in enumerate(chars))
+{% endhighlight %}
+
+Create training examples and targets. We bound the maximum length of the sentence to be 512 chars while the maximum 
+number of sentences in a document is bounded at 15. We reverse the order of characters putting the first character at the
+end of the 512D vector. 
+
+{% highlight python %}
+maxlen = 512
+max_sentences = 15
+
+X = np.ones((len(docs), max_sentences, maxlen), dtype=np.int64) * -1
+y = np.array(sentiments)
+
+for i, doc in enumerate(docs):
+    for j, sentence in enumerate(doc):
+        if j < max_sentences:
+            for t, char in enumerate(sentence[-maxlen:]):
+                X[i, j, (maxlen-1-t)] = char_indices[char]
+
+{% endhighlight %}
+
+We now have our training examples X and the corresponding y target sentiments. X is indexed as (document, sentence, char).
+The first part of our model is to build a sentence encoder from characters. Using *Keras* we can do that in a few lines of code. 
+
+We need to declare a lambda layer that will create a onehot encoding of a sequence of characters on the fly.
+
+{% highlifht python %}
+
+def binarize(x, sz=71):
+    return tf.to_float(tf.one_hot(x, sz, on_value=1, off_value=0, axis=-1))
+
+filter_length = [5, 3, 3]
+nb_filter = [196, 196, 256]
+pool_length = 2
+
+in_sentence = Input(shape=(maxlen,), dtype='int64')
+# binarize function creates a onehot encoding of each character index
+embedded = Lambda(binarize, output_shape=binarize_outshape)(in_sentence)
+
+for i in range(len(nb_filter)):
+    embedded = Convolution1D(nb_filter=nb_filter[i],
+                            filter_length=filter_length[i],
+                            border_mode='valid',
+                            activation='relu',
+                            init='glorot_normal',
+                            subsample_length=1)(embedded)
+
+    embedded = Dropout(0.1)(embedded)
+    embedded = MaxPooling1D(pool_length=pool_length)(embedded)
+
+forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
+backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
+
+sent_encode = merge([forward_sent, backward_sent], mode='concat', concat_axis=-1)
+sent_encode = Dropout(0.3)(sent_encode)
+
+encoder = Model(input=in_sentence, output=sent_encode)
+
+{% endhighlight%} 
+
+The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 1DMaxPooling
+and dropout. Then a bidrectional LSTM is 2 lines of code.
+{% highlifht python %}
+forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
+backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
+{% endhighlight%} 
+
+After creating the sentence encoder we create the complete model that will encode the whole document.
+
+{% highlifht python %}
+
+sequence = Input(shape=(max_sentences, maxlen), dtype='int64')
+encoded = TimeDistributed(encoder)(sequence)
+forwards = LSTM(80, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(encoded)
+backwards = LSTM(80, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(encoded)
+
+merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
+output = Dropout(0.3)(merged)
+output = Dense(128, activation='relu')(output)
+output = Dropout(0.3)(output)
+output = Dense(1, activation='sigmoid')(output)
+
+model = Model(input=sequence, output=output)
+{% endhighlight%} 
+
+The *TimeDistributed* layer is what allows to run a copy of the *encoder* to every sentence in the document. The final output is a sigmoid function 
+that predicts 1 for positive, 0 for negative sentiment. 
+
