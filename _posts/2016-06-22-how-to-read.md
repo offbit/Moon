@@ -119,7 +119,7 @@ The first part of our model is to build a sentence encoder from characters. Usin
 
 We need to declare a lambda layer that will create a onehot encoding of a sequence of characters on the fly.
 
-{% highlifht python %}
+{% highlight python %}
 
 def binarize(x, sz=71):
     return tf.to_float(tf.one_hot(x, sz, on_value=1, off_value=0, axis=-1))
