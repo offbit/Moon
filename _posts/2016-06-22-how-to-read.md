@@ -155,14 +155,14 @@ encoder = Model(input=in_sentence, output=sent_encode)
 
 The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 1DMaxPooling
 and dropout. Then a bidrectional LSTM is 2 lines of code.
-{% highlifht python %}
+{% highlight python %}
 forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
 backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
 {% endhighlight%} 
 
 After creating the sentence encoder we create the complete model that will encode the whole document.
 
-{% highlifht python %}
+{% highlight python %}
 
 sequence = Input(shape=(max_sentences, maxlen), dtype='int64')
 encoded = TimeDistributed(encoder)(sequence)
