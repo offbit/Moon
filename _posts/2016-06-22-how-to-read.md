@@ -42,7 +42,7 @@ Like any typical model that uses a word as it's smallest input entity, a charact
 This model is reading characters one by one, to create an embedding of the of a given sentence/text. As such our neural network will try to learn that specific sequences of letters form words separated by spaces or other punctuation points. A paper from A. Karpathy & J. Johnson, ["Visualizing and Understanding Recurrent Networks"](http://arxiv.org/abs/1506.02078), demonstrates visually some of the internal processes of char-rnn models. 
 
 In a paper the ["Exploring the Limits of Language Modeling"](https://arxiv.org/pdf/1602.02410.pdf), from the Google Brain team they show that a character level language model can significantly outperform state of the art models. In their paper the best performing model combines an LSTM with CNN input over the characters, the figure bellow is taken from their paper:
-![cnn lstm](https://drive.google.com/file/d/0B0kPA_CNtQ1eVy1OdUhoY3FYU1E/view?usp=sharing"cnn lstm")
+![cnn lstm](https://drive.google.com/open?id=0B0kPA_CNtQ1eVy1OdUhoY3FYU1E "cnn lstm")
 
 In his paper ["Text Understanding from Scratch"](https://arxiv.org/pdf/1502.01710v5.pdf) Zhang et. al. uses pure character level convolution networks to perform text classification with impressive performance. The following figure from his paper describes the model:
 ![Character level cnn model](https://lh3.googleusercontent.com/-I_Nu_jMK9Cw/V2Q2ddX2zvI/AAAAAAAAG88/GQ0E4vZ4BM4tGmKfTjVLPViAXQvOb0rUQCLcB/s0/Selection_001.png "Char-cnn")
