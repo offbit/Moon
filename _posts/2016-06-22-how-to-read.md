@@ -29,7 +29,7 @@ Karpathy’s blog post was probably my first encounter with character level mode
 If you have a question about a model, the best thing to do with it is experiment. So let's do it!
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
 
-##What is a character level model?
+## What is a character level model?
 Let's assume the typical problem of sentiment analysis, given a text, for a example a movie review we need to figure out if the review is positive(1) or negative(0). Let's denote $x_i$ the text input, which is a sequence of words, and $y_i$ the corresponding sentiment, so we create a network $f(x_i)$ that will predict the label of the sample. In such settings a typical approach is to split the text into a sequence of words, and then learn some fixed length embedding of the sequence that will be used to classify it.
 
 ![Simple RNN scheme for sentiment](https://docs.google.com/drawings/d/1gMotfbclUBdUWvf15qtoHe2Xve5PR2-9jBsT__CV5UE/pub?w=192&h=159 "Simple RNN  scheme for sentiment classification")
@@ -47,7 +47,7 @@ In a paper the ["Exploring the Limits of Language Modeling"](https://arxiv.org/p
 In his paper ["Text Understanding from Scratch"](https://arxiv.org/pdf/1502.01710v5.pdf) Zhang et. al. uses pure character level convolution networks to perform text classification with impressive performance. The following figure from his paper describes the model:
 ![Character level cnn model](https://lh3.googleusercontent.com/-I_Nu_jMK9Cw/V2Q2ddX2zvI/AAAAAAAAG88/GQ0E4vZ4BM4tGmKfTjVLPViAXQvOb0rUQCLcB/s0/Selection_001.png "Char-cnn")
 
-##Building a sentiment model
+## Building a sentiment model
 
 Let's try build our model on the popular IMDB review database, the labelled data can be found on this Kaggle competition [webpage](https://www.kaggle.com/c/word2vec-nlp-tutorial/data), we are just going to use the labelled labeledTrainData.tsv which contains 25000 reviews with labels. If you haven't worked text before, the competition website offers a nice 4-part tutorial to create sentiment analysis models. 
 
