@@ -7,23 +7,22 @@ tags: [dnn, nlp, char-level, rnn]
 comments: true
 ---
 
-
-
 How to read: Character level deep learning
 ===================================
-2016, the year of the chat bots. Chat bots seem to be extremely popular these days, every other tech company is announcing some form of intelligent language interface. The truth is that language is everywhere, it’s the way we communicate and the way we manage our thoughts. Most, if not all, of our culture & knowledge is encoded and stored in some language. One can think that if you manage to tap to that source of information efficiently then we are definitely a step closer to create ground breaking machine learning algorithms. Of course, chat-bots are not even close to “solving” the language problem, after all language is as broad as our thoughts. But, on the other hand researchers still make useful NLP application that are super cool, like gmail [auto-reply](http://arxiv.org/abs/1606.04870) or [deep-text](https://code.facebook.com/posts/181565595577955) from Facebook.
+2016, the year of the chat bots. Chat bots seem to be extremely popular these days, every other tech company is announcing some form of intelligent language interface. The truth is that language is everywhere, it’s the way we communicate and the way we manage our thoughts. Most, if not all, of our culture & knowledge is encoded and stored in some language. One can think that if we manage to tap to that source of information efficiently then we are a step closer to create ground breaking knowledge systems. Of course, chat-bots are not even close to “solving” the language problem, after all language is as broad as our thoughts. 
+On the other hand researchers still make useful NLP application that are impressive, like gmail's [auto-reply](http://arxiv.org/abs/1606.04870) or [deep-text](https://code.facebook.com/posts/181565595577955) from Facebook.
 
-So after reading a few papers about NLP, and specifically deep learning applications, I decided to go ahead and try out a few things on my own. In this post will demonstrate a few fun character level models for sentiment classification. The models are built with my favourite framework [*Keras*](http://keras.io) (with [Tensorflow](https://tensorflow.org) as back-end). In case you haven’t used *Keras* before I strongly suggest it, it is simple and allows for very fast prototyping (thanks [François Chollet](https://twitter.com/fchollet). After version 1.0 with the new functional API creating complex models can be as easy as a few lines. I’m hoping to demonstrate some of it’s potential as we go along.
+After reading a few papers about NLP, and specifically deep learning applications, I decided to go ahead and try out a few things on my own. In this post I will demonstrate a character level models for sentiment classification. The models are built with my favourite framework [*Keras*](http://keras.io) (with [Tensorflow](https://tensorflow.org) as back-end). In case you haven’t used *Keras* before I strongly suggest it, it is simple and allows for very fast prototyping (thanks [François Chollet](https://twitter.com/fchollet). After version 1.0 and the introduction of the new functional API, creating complex models can be as easy as a few lines. I’m hoping to demonstrate some of it’s potential as we go along.
 
-If you want to get familiar with the framework I would suggest following the links:
+If you want to get familiar with the framework I would suggest following these links:
 
  - [30 seconds to *Keras*](http://keras.io/#getting-started-30-seconds-to-keras)
  - [*Keras* examples](https://github.com/fchollet/keras/tree/master/examples)
  - [Building powerful image classification models using very little data](http://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html)
 
-I assume that most people reading this have some basic knowledge about convolution networks, mlps, and rnn/lstm models. 
+**_I also assume that most people reading this have some basic knowledge about convolution networks, mlps, and rnn/lstm models._**  
 
-A very popular post from [Andrej Karpathy](https://twitter.com/karpathy) talking about the effectiveness of recurrent nets presents a character level language model build with RNNs, find it [here](http://karpathy.github.io/2015/05/21/rnn-effectiveness/). A simple implementation of this model for *Keras*, [here](https://github.com/fchollet/keras/blob/master/examples/lstm_text_generation.py).
+A very popular post from [Andrej Karpathy](https://twitter.com/karpathy) talking about the effectiveness of recurrent nets presents a character level language model built with RNNs, find it [here](http://karpathy.github.io/2015/05/21/rnn-effectiveness/). A simple implementation of this model for *Keras*, [here](https://github.com/fchollet/keras/blob/master/examples/lstm_text_generation.py).
 
 Karpathy’s blog post was probably my first encounter with character level modelling and I have to say I was fascinated by it’s performance. In English character level might not be as appealing as other languages like Greek(my native language). Trying to build vocabularies in Greek can be a bit tricky since words change given the context, so working on character level and letting your model figure out the different word permutations is a very appealing property.
 
@@ -42,19 +41,19 @@ Like any typical model that uses a word as it's smallest input entity, a charact
 
 This model is reading characters one by one, to create an embedding of the of a given sentence/text. As such our neural network will try to learn that specific sequences of letters form words separated by spaces or other punctuation points. A paper from A. Karpathy & J. Johnson, ["Visualizing and Understanding Recurrent Networks"](http://arxiv.org/abs/1506.02078), demonstrates visually some of the internal processes of char-rnn models. 
 
-In a paper the ["Exploring the Limits of Language Modeling"](https://arxiv.org/pdf/1602.02410.pdf), from the Google Brain team they show that a character level language model can significantly outperform state of the art models. In their paper the best performing model combines an LSTM with CNN input over the characters, the figure bellow is taken from their paper:
+In their paper ["Exploring the Limits of Language Modeling"](https://arxiv.org/pdf/1602.02410.pdf), the Google Brain team show that a character level language model can significantly outperform state of the art models. Their best performing model combines an LSTM with CNN input over the characters, the figure bellow is taken from their paper:
 ![cnn lstm](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/char-cnn-lstm-google.png "cnn lstm")
 
-In his paper ["Text Understanding from Scratch"](https://arxiv.org/pdf/1502.01710v5.pdf) Zhang et. al. uses pure character level convolution networks to perform text classification with impressive performance. The following figure from his paper describes the model:
+In ["Text Understanding from Scratch"](https://arxiv.org/pdf/1502.01710v5.pdf) Zhang et. al. uses pure character level convolution networks to perform text classification with impressive performance. The following figure taken from the paper describes the model:
 ![Character level cnn model](https://lh3.googleusercontent.com/-I_Nu_jMK9Cw/V2Q2ddX2zvI/AAAAAAAAG88/GQ0E4vZ4BM4tGmKfTjVLPViAXQvOb0rUQCLcB/s0/Selection_001.png "Char-cnn")
 
 ## Building a sentiment model
 
-Let's try build our model on the popular IMDB review database, the labelled data can be found on this Kaggle competition [webpage](https://www.kaggle.com/c/word2vec-nlp-tutorial/data), we are just going to use the labelled labeledTrainData.tsv which contains 25000 reviews with labels. If you haven't worked text before, the competition website offers a nice 4-part tutorial to create sentiment analysis models. 
+Let's try build our model on the popular IMDB review database, the labelled data can be found on this Kaggle competition [webpage](https://www.kaggle.com/c/word2vec-nlp-tutorial/data), we are just going to use the labelled labeledTrainData.tsv which contains 25000 reviews with labels. If you haven't worked text before, the competition website offers a nice 4-part tutorial to create sentiment prediction models. 
 
-The base of our model is that we want to encode text from character level, so we'll begin by splitting the text into sentences. Creating sentences from reviews bounds the maximum length of a sequence so it can be easier for our model to handle. After encoding each sentence from characters to a fixed length encoding we use a bi-directional LSTM to read sentence by sentence and create a more elaborate doc encoding. 
+Our goal is to encode text from character level, so we'll begin by splitting the text into sentences. Creating sentences from reviews bounds the maximum length of a sequence so it can be easier for our model to handle. After encoding each sentence from characters to a fixed length encoding we use a bi-directional LSTM to read sentence by sentence and create a complete document encoding. 
 
-The following figure demonstrates the full model
+The following figure elaborates the full model architecture
 
 ![Full model](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/fullmodel.jpg)
 
@@ -64,8 +63,8 @@ This model starts from reading characters and forming concepts of "words", then 
 
 There is minimum preprocessing required for this approach, since our goal is to provide simple text and let the model figure out what that means. So we follow 3 basic steps:
 
- 1. Read review & remove html tags
- 2. Clean non English characters 
+ 1. Remove html tags
+ 2. Remove non characters (e.g. weird symbols) 
  3. Split into sentences
 
 {% highlight python %}
@@ -119,7 +118,8 @@ for i, doc in enumerate(docs):
 We now have our training examples X and the corresponding y target sentiments. X is indexed as (document, sentence, char).
 The first part of our model is to build a sentence encoder from characters. Using *Keras* we can do that in a few lines of code. 
 
-We need to declare a lambda layer that will create a onehot encoding of a sequence of characters on the fly.
+We need to declare a lambda layer that will create a onehot encoding of a sequence of characters on the fly. Holding one-hot encodings
+in memory is very inefficient. 
 
 {% highlight python %}
 
@@ -156,7 +156,7 @@ encoder = Model(input=in_sentence, output=sent_encode)
 {% endhighlight%} 
 
 The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 
-1DMaxPooling and dropout. Then a bidrectional LSTM is 2 lines of code.
+1DMaxPooling and dropout. On top of that there is a bidrectional LSTM (just 2 lines of code).
 {% highlight python %}
 forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
 backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
@@ -165,10 +165,8 @@ backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, 
 ### CNN Sentence Encoder
 
 An alternative sentence encoder is one that only uses convolutions and fully connected layers to encode a sentence. The following code composes a network 
-with 2 streams of 3 convolutional layers that operate on different lengths, after that a temporal max pooling is performed and the 2 streams are concatenated
-to create a merged vector. The idea behind temporal maxpooling is to identify those *features* that give a strong sentiment, that could correspond to words
-like *bad*, *excellent*, *dislike* etc. A temporal max pooling hypothetically will strongly activate some neurons in the sequence, but we do not care about 
-the position of these 'words', we are just looking for high responses.
+with 2 streams of 3 convolutional layers that operate on different convolutional lengths, after that a temporal max pooling is performed and the 2 streams are concatenated to create a merged vector. 
+The idea behind temporal maxpooling is to identify those *features* that give a strong sentiment, that could correspond to words like *bad*, *excellent*, *dislike* etc. A temporal max pooling hypothetically will strongly activate some neurons in the sequence, but we do not care about the position of these *'words'*, we are only looking for high responses of certain patterns.
 
 The following code creates the 2 stream cnn network:
 {% highlight python %}
@@ -224,7 +222,7 @@ output = Dense(1, activation='sigmoid')(output)
 model = Model(input=sequence, output=output)
 {% endhighlight%} 
 
-The *TimeDistributed* layer is what allows to run a copy of the *encoder* to every sentence in the document. 
+The *TimeDistributed* layer is what allows the model to run a copy of the *encoder* to every sentence in the document. 
 The final output is a sigmoid function that predicts 1 for positive, 0 for negative sentiment. 
 
 The model is trained with an cnn/bi-lstm encoder on 20000 reviews and validating on 2500 reviews. The optimzer used is adam with the default parameters.
@@ -232,9 +230,7 @@ The model roughly achieves ~86% accuarcy on the validation in the first 15 epoch
 
 ![Training Model](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/doc-rnn.png "Char-cnn")
 
-After the 15 epochs the model is improving on the validation set but still increases performance on the training set. 
-Bare in mind the parameters of the model are not tuned. The purpose of this post is to demonstrate how create character level models 
-and not achieve the best possible result.
+After the 15 epochs the model's improvement on the validation set is stalling but still increases performance on the training set. A better tuned model would probably overcome this but the purpose of this post is to demonstrate how create character level models  and not achieve the best possible result.
 Some things that might improve the generalisation and reduce overfitting:
 
 - Different hidden layer sizes, smaller layers will reduce the abillity of the model to overfit to the training set.
@@ -252,9 +248,6 @@ All of the code can be found in my github repository: [https://github.com/offbit
 
 ### Final words
 
-I really enjoy the idea of creating character level models, there is something appealing in creating models that work on such level. Maybe 
-in this dataset it's not achieving top performance like a model that works on word level with pretrained word embeddings, but such models 
-have a head start when it comes to training. Some of the aforementioned papers show promising results, that given enough data character level 
-models can shine.  
+I really enjoy the idea of creating character level models, there is something appealing in creating models that work on such level. Character level modelling enables us to deal with common miss-spellings, different permutation of words (think run, runs, running) that are even more common in some other languages. I'm also expecting to work better in text that contains, emojis, signaling chars, hashtags and all the funky annotations that are being used in social media. In the best of my knowledge I haven't seen results of char-level models in twitter data for example, but I'm guessing twitter/fb/google already test these things in large social media uncurated corpus. Some of the aforementioned papers already show promising results, and given enough data character level models shine.
 
 If you liked my post drop me a line at twitter [@techabilly](https://twitter.com/techabilly), or email: at s.vafeias_at_gmail .
