@@ -31,7 +31,7 @@ If you have a question about a model, the best thing to do with it is experiment
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
 
 ## What is a character level model?
-Let's assume the typical problem of sentiment analysis, given a text, for a example a movie review we need to figure out if the review is positive(1) or negative(0). Let's denote $x_i$ the text input, which is a sequence of words, and $y_i$ the corresponding sentiment, so we create a network $f(x_i)$ that will predict the label of the sample. In such settings a typical approach is to split the text into a sequence of words, and then learn some fixed length embedding of the sequence that will be used to classify it.
+Let's assume the typical problem of sentiment analysis, given a text, for a example a movie review we need to figure out if the review is positive(1) or negative(0). Let's denote $$x_i$$ the text input, which is a sequence of words, and $$y_i$$ the corresponding sentiment, so we create a network $$f(x_i)$$ that will predict the label of the sample. In such settings a typical approach is to split the text into a sequence of words, and then learn some fixed length embedding of the sequence that will be used to classify it.
 
 ![Simple RNN scheme for sentiment](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/lstm.jpg "Simple RNN  scheme for sentiment classification")
 
