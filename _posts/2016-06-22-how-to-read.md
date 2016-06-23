@@ -250,4 +250,4 @@ All of the code can be found in my github repository: [https://github.com/offbit
 
 I really enjoy the idea of creating character level models, there is something appealing in creating models that work on such level. Character level modelling enables us to deal with common miss-spellings, different permutation of words (think run, runs, running) that are even more common in some other languages. I'm also expecting to work better in text that contains, emojis, signaling chars, hashtags and all the funky annotations that are being used in social media. In the best of my knowledge I haven't seen results of char-level models in twitter data for example, but I'm guessing twitter/fb/google already test these things in large social media uncurated corpus. Some of the aforementioned papers already show promising results, and given enough data character level models shine.
 
-If you liked my post drop me a line at twitter [@techabilly](https://twitter.com/techabilly), or email: at s.vafeias_at_gmail .
+If you liked my post drop me a line at twitter [@techabilly](https://twitter.com/techabilly), or email: s.vafeias_at_gmail .
