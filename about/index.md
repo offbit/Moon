@@ -7,7 +7,7 @@ comments: false
 ---
     
 <center><a href="https://offbit.github.com"><b>Offbit</b></a> is a tech blog. </center> 
-<center> Bit's and pieces from a social robot. <center>
+
 
 ## About Me
 
