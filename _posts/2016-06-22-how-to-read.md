@@ -238,10 +238,15 @@ and not achieve the best possible result.
 Some things that might improve the generalisation and reduce overfitting:
 
 - Different hidden layer sizes, smaller layers will reduce the abillity of the model to overfit to the training set.
+
 - Larger dropout rates.
+
 - l2/l1 regularization.
+
 - A deeper and/or wider architecture of cnn encoder.
+
 - Different doc encoder, maybe include an attention module?
+
 
 All of the code can be found in my github repository: [https://github.com/offbit/char-models](https://github.com/offbit/char-models)
 
