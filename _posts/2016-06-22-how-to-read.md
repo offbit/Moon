@@ -114,6 +114,8 @@ for i, doc in enumerate(docs):
 
 {% endhighlight %}
 
+### Sentence Encoder
+
 We now have our training examples X and the corresponding y target sentiments. X is indexed as (document, sentence, char).
 The first part of our model is to build a sentence encoder from characters. Using *Keras* we can do that in a few lines of code. 
 
@@ -153,14 +155,58 @@ encoder = Model(input=in_sentence, output=sent_encode)
 
 {% endhighlight%} 
 
-The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 1DMaxPooling
-and dropout. Then a bidrectional LSTM is 2 lines of code.
+The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 
+1DMaxPooling and dropout. Then a bidrectional LSTM is 2 lines of code.
 {% highlight python %}
 forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
 backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
 {% endhighlight%} 
 
-After creating the sentence encoder we create the complete model that will encode the whole document.
+### CNN Sentence Encoder
+
+An alternative sentence encoder is one that only uses convolutions and fully connected layers to encode a sentence. The following code composes a network 
+with 2 streams of 3 convolutional layers that operate on different lengths, after that a temporal max pooling is performed and the 2 streams are concatenated
+to create a merged vector. The idea behind temporal maxpooling is to identify those *features* that give a strong sentiment, that could correspond to words
+like *bad*, *excellent*, *dislike* etc. A temporal max pooling hypothetically will strongly activate some neurons in the sequence, but we do not care about 
+the position of these 'words', we are just looking for high responses.
+
+The following code creates the 2 stream cnn network:
+{% highlight python %}
+def max_1d(X):
+    return K.max(X, axis=1)
+
+def char_block(in_layer, nb_filter=[64, 100], filter_length=[3, 3], subsample=[2, 1], pool_length=[2, 2]):
+    block = in_layer
+    for i in range(len(nb_filter)):
+
+        block = Convolution1D(nb_filter=nb_filter[i],
+                              filter_length=filter_length[i],
+                              border_mode='valid',
+                              activation='relu',
+                              subsample_length=subsample[i])(block)
+        # block = BatchNormalization()(block)
+        block = Dropout(0.1)(block)
+        if pool_length[i]:
+            block = MaxPooling1D(pool_length=pool_length[i])(block)
+
+    block = Lambda(max_1d, output_shape=(nb_filter[-1],))(block)
+    block = Dense(128, activation='relu')(block)
+    return block
+
+in_sentence = Input(shape=(maxlen, ), dtype='int64')
+embedded = Lambda(binarize, output_shape=binarize_outshape)(in_sentence)
+
+block2 = char_block(embedded, [100, 200, 200], filter_length=[5, 3, 3], subsample=[1, 1, 1], pool_length=[2, 2, 2])
+block3 = char_block(embedded, [200, 300, 300], filter_length=[7, 3, 3], subsample=[1, 1, 1], pool_length=[2, 2, 2])
+
+sent_encode = merge([block2, block3], mode='concat', concat_axis=-1)
+sent_encode = Dropout(0.4)(sent_encode)
+encoder = Model(input=in_sentence, output=sent_encode)
+{% endhighlight%} 
+
+### Document Encoder
+
+The sentence encoder feeds it's output to a document encoder that is composed of a bidirectional lstm with fully connected layers at the top.
 
 {% highlight python %}
 
@@ -178,6 +224,31 @@ output = Dense(1, activation='sigmoid')(output)
 model = Model(input=sequence, output=output)
 {% endhighlight%} 
 
-The *TimeDistributed* layer is what allows to run a copy of the *encoder* to every sentence in the document. The final output is a sigmoid function 
-that predicts 1 for positive, 0 for negative sentiment. 
+The *TimeDistributed* layer is what allows to run a copy of the *encoder* to every sentence in the document. 
+The final output is a sigmoid function that predicts 1 for positive, 0 for negative sentiment. 
 
+The model is trained with an cnn/bi-lstm encoder on 20000 reviews and validating on 2500 reviews. The optimzer used is adam with the default parameters.
+The model roughly achieves ~86% accuarcy on the validation in the first 15 epochs. (*Note*: A sligthly different architecture with a two stream cnn sentence net performs similarly)
+
+![Training Model](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/doc-rnn.png "Char-cnn")
+
+After the 15 epochs the model is improving on the validation set but still increases performance on the training set. 
+Bare in mind the parameters of the model are not tuned. The purpose of this post is to demonstrate how create character level models 
+and not achieve the best possible result.
+Some things that might improve the generalisation and reduce overfitting:
+* Different hidden layer sizes, smaller layers will reduce the abillity of the model to overfit to the training set.
+* Larger dropout rates.
+* l2/l1 regularization.
+* A deeper and/or wider architecture of cnn encoder.
+* Different doc encoder, maybe include an attention module?
+
+All of the code can be found in my github repository: [https://github.com/offbit/char-models](https://github.com/offbit/char-models)
+
+### Final words
+
+I really enjoy the idea of creating character level models, there is something appealing in creating models that work on such level. Maybe 
+in this dataset it's not achieving top performance like a model that works on word level with pretrained word embeddings, but such models 
+have a head start when it comes to training. Some of the aforementioned papers show promising results, that given enough data character level 
+models can shine.  
+
+If you liked my post drop me a line at twitter [techabilly](https://twitter.com/techabilly), or email: at s.vafeias_at_gmail .
