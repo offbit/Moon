@@ -11,7 +11,6 @@ comments: false
 
 ## About Me
 
-and 
 My name is Stathis Vafeias and I'm a ML hacker! I received my PhD in Robotics from Edinburgh University under the supervision of S.Ramamoorthy. My research is focused on learning how to perceive the world. Currently I work for a London based start-up, [AimBrain](https://www.aimbrain.com) where I lead the efforts of creating machine learning algorithms for a biometric authentication platform.
 
 ## This Blog
