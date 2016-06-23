@@ -251,4 +251,4 @@ in this dataset it's not achieving top performance like a model that works on wo
 have a head start when it comes to training. Some of the aforementioned papers show promising results, that given enough data character level 
 models can shine.  
 
-If you liked my post drop me a line at twitter [techabilly](https://twitter.com/techabilly), or email: at s.vafeias_at_gmail .
+If you liked my post drop me a line at twitter [@techabilly](https://twitter.com/techabilly), or email: at s.vafeias_at_gmail .
