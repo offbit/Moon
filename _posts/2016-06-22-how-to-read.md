@@ -4,7 +4,7 @@ title: "How to read: Character level deep learning"
 date: 2016-06-22
 excerpt: "How to make character level deep nets for NLP tasks"
 tags: [dnn, nlp, char-level, rnn]
-comments: true
+comments: false
 ---
 
 How to read: Character level deep learning
