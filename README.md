@@ -1,10 +1,4 @@
-**[offbit](http://offbit.github.com)** an offbit tech blog.
-
-## About Me
-
-My name is Stathis Vafeias, and I work for a biometric authentication startup called [AimBrain](https://www.aimbrain.com).
-I received my PhD in Robotics from Edinburgh University under the supervision of S.Ramamoorthy. My research interest is 
-learning how to perceive the world.
+**[offbit](http://offbit.github.com)** an offbit tech blog. Bit's and pieces of a social robot.
 
 ##This Blog
 
