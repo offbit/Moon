@@ -9,7 +9,10 @@ comments: false
 
 How to read: Character level deep learning
 ===================================
-2016, the year of the chat bots. Chat bots seem to be extremely popular these days, every other tech company is announcing some form of intelligent language interface. The truth is that language is everywhere, it’s the way we communicate and the way we manage our thoughts. Most, if not all, of our culture & knowledge is encoded and stored in some language. One can think that if we manage to tap to that source of information efficiently then we are a step closer to create ground breaking knowledge systems. Of course, chat-bots are not even close to “solving” the language problem, after all language is as broad as our thoughts. 
+
+***UPDATE 30/03/2017: The repository code has been updated to tf 1.0 and keras 2.0! The repository will not be maintained any more.***
+
+2016, the year of the chat bots. Chat bots seem to be extremely popular these days, every other tech company is announcing some form of intelligent language interface. The truth is that language is everywhere, it’s the way we communicate and the way we manage our thoughts. Most, if not all, of our culture & knowledge is encoded and stored in some language. One can think that if we manage to tap to that source of information efficiently then we are a step closer to create ground breaking knowledge systems. Of course, chat-bots are not even close to “solving” the language problem, after all language is as broad as our thoughts.
 On the other hand researchers still make useful NLP application that are impressive, like gmail's [auto-reply](http://arxiv.org/abs/1606.04870) or [deep-text](https://code.facebook.com/posts/181565595577955) from Facebook.
 
 After reading a few papers about NLP, and specifically deep learning applications, I decided to go ahead and try out a few things on my own. In this post I will demonstrate a character level models for sentiment classification. The models are built with my favourite framework [*Keras*](http://keras.io) (with [Tensorflow](https://tensorflow.org) as back-end). In case you haven’t used *Keras* before I strongly suggest it, it is simple and allows for very fast prototyping (thanks [François Chollet](https://twitter.com/fchollet). After version 1.0 and the introduction of the new functional API, creating complex models can be as easy as a few lines. I’m hoping to demonstrate some of it’s potential as we go along.
@@ -39,7 +42,7 @@ In a recurrent model like the above, each word is encoded as a vector (a very ni
 Like any typical model that uses a word as it's smallest input entity, a character level model will use the character as the the smallest entity. E.g:
 ![Character level RNN](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/char-lstm.jpg "character level rnn")
 
-This model is reading characters one by one, to create an embedding of the of a given sentence/text. As such our neural network will try to learn that specific sequences of letters form words separated by spaces or other punctuation points. A paper from A. Karpathy & J. Johnson, ["Visualizing and Understanding Recurrent Networks"](http://arxiv.org/abs/1506.02078), demonstrates visually some of the internal processes of char-rnn models. 
+This model is reading characters one by one, to create an embedding of the of a given sentence/text. As such our neural network will try to learn that specific sequences of letters form words separated by spaces or other punctuation points. A paper from A. Karpathy & J. Johnson, ["Visualizing and Understanding Recurrent Networks"](http://arxiv.org/abs/1506.02078), demonstrates visually some of the internal processes of char-rnn models.
 
 In their paper ["Exploring the Limits of Language Modeling"](https://arxiv.org/pdf/1602.02410.pdf), the Google Brain team show that a character level language model can significantly outperform state of the art models. Their best performing model combines an LSTM with CNN input over the characters, the figure bellow is taken from their paper:
 ![cnn lstm](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/char-cnn-lstm-google.png "cnn lstm")
@@ -49,22 +52,22 @@ In ["Text Understanding from Scratch"](https://arxiv.org/pdf/1502.01710v5.pdf) Z
 
 ## Building a sentiment model
 
-Let's try build our model on the popular IMDB review database, the labelled data can be found on this Kaggle competition [webpage](https://www.kaggle.com/c/word2vec-nlp-tutorial/data), we are just going to use the labelled labeledTrainData.tsv which contains 25000 reviews with labels. If you haven't worked text before, the competition website offers a nice 4-part tutorial to create sentiment prediction models. 
+Let's try build our model on the popular IMDB review database, the labelled data can be found on this Kaggle competition [webpage](https://www.kaggle.com/c/word2vec-nlp-tutorial/data), we are just going to use the labelled labeledTrainData.tsv which contains 25000 reviews with labels. If you haven't worked text before, the competition website offers a nice 4-part tutorial to create sentiment prediction models.
 
-Our goal is to encode text from character level, so we'll begin by splitting the text into sentences. Creating sentences from reviews bounds the maximum length of a sequence so it can be easier for our model to handle. After encoding each sentence from characters to a fixed length encoding we use a bi-directional LSTM to read sentence by sentence and create a complete document encoding. 
+Our goal is to encode text from character level, so we'll begin by splitting the text into sentences. Creating sentences from reviews bounds the maximum length of a sequence so it can be easier for our model to handle. After encoding each sentence from characters to a fixed length encoding we use a bi-directional LSTM to read sentence by sentence and create a complete document encoding.
 
 The following figure elaborates the full model architecture
 
 ![Full model](https://raw.githubusercontent.com/offbit/offbit.github.io/master/assets/char-models/fullmodel.jpg)
 
-This model starts from reading characters and forming concepts of "words", then uses a bi-directional LSTM to read "words" as a sequence and account for their position. After that each sentence encoding is being passed through a second bi-directional LSTM that does the final document encoding. 
+This model starts from reading characters and forming concepts of "words", then uses a bi-directional LSTM to read "words" as a sequence and account for their position. After that each sentence encoding is being passed through a second bi-directional LSTM that does the final document encoding.
 
-### Preprocessing 
+### Preprocessing
 
 There is minimum preprocessing required for this approach, since our goal is to provide simple text and let the model figure out what that means. So we follow 3 basic steps:
 
  1. Remove html tags
- 2. Remove non characters (e.g. weird symbols) 
+ 2. Remove non characters (e.g. weird symbols)
  3. Split into sentences
 
 {% highlight python %}
@@ -94,9 +97,9 @@ char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 {% endhighlight %}
 
-Create training examples and targets. We bound the maximum length of the sentence to be 512 chars while the maximum 
+Create training examples and targets. We bound the maximum length of the sentence to be 512 chars while the maximum
 number of sentences in a document is bounded at 15. We reverse the order of characters putting the first character at the
-end of the 512D vector. 
+end of the 512D vector.
 
 {% highlight python %}
 maxlen = 512
@@ -116,10 +119,10 @@ for i, doc in enumerate(docs):
 ### Sentence Encoder
 
 We now have our training examples X and the corresponding y target sentiments. X is indexed as (document, sentence, char).
-The first part of our model is to build a sentence encoder from characters. Using *Keras* we can do that in a few lines of code. 
+The first part of our model is to build a sentence encoder from characters. Using *Keras* we can do that in a few lines of code.
 
 We need to declare a lambda layer that will create a onehot encoding of a sequence of characters on the fly. Holding one-hot encodings
-in memory is very inefficient. 
+in memory is very inefficient.
 
 {% highlight python %}
 
@@ -153,19 +156,19 @@ sent_encode = Dropout(0.3)(sent_encode)
 
 encoder = Model(input=in_sentence, output=sent_encode)
 
-{% endhighlight%} 
+{% endhighlight%}
 
-The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity, 
+The functional api of *Keras* allows us to create funky structures with minimum effort. This structure has 3 1DConvolution layers, with relu nonlinearity,
 1DMaxPooling and dropout. On top of that there is a bidrectional LSTM (just 2 lines of code).
 {% highlight python %}
 forward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu')(embedded)
 backward_sent = LSTM(128, return_sequences=False, dropout_W=0.2, dropout_U=0.2, consume_less='gpu', go_backwards=True)(embedded)
-{% endhighlight%} 
+{% endhighlight%}
 
 ### CNN Sentence Encoder
 
-An alternative sentence encoder is one that only uses convolutions and fully connected layers to encode a sentence. The following code composes a network 
-with 2 streams of 3 convolutional layers that operate on different convolutional lengths, after that a temporal max pooling is performed and the 2 streams are concatenated to create a merged vector. 
+An alternative sentence encoder is one that only uses convolutions and fully connected layers to encode a sentence. The following code composes a network
+with 2 streams of 3 convolutional layers that operate on different convolutional lengths, after that a temporal max pooling is performed and the 2 streams are concatenated to create a merged vector.
 The idea behind temporal maxpooling is to identify those *features* that give a strong sentiment, that could correspond to words like *bad*, *excellent*, *dislike* etc. A temporal max pooling hypothetically will strongly activate some neurons in the sequence, but we do not care about the position of these *'words'*, we are only looking for high responses of certain patterns.
 
 The following code creates the 2 stream cnn network:
@@ -200,7 +203,7 @@ block3 = char_block(embedded, [200, 300, 300], filter_length=[7, 3, 3], subsampl
 sent_encode = merge([block2, block3], mode='concat', concat_axis=-1)
 sent_encode = Dropout(0.4)(sent_encode)
 encoder = Model(input=in_sentence, output=sent_encode)
-{% endhighlight%} 
+{% endhighlight%}
 
 ### Document Encoder
 
@@ -220,10 +223,10 @@ output = Dropout(0.3)(output)
 output = Dense(1, activation='sigmoid')(output)
 
 model = Model(input=sequence, output=output)
-{% endhighlight%} 
+{% endhighlight%}
 
-The *TimeDistributed* layer is what allows the model to run a copy of the *encoder* to every sentence in the document. 
-The final output is a sigmoid function that predicts 1 for positive, 0 for negative sentiment. 
+The *TimeDistributed* layer is what allows the model to run a copy of the *encoder* to every sentence in the document.
+The final output is a sigmoid function that predicts 1 for positive, 0 for negative sentiment.
 
 The model is trained with an cnn/bi-lstm encoder on 20000 reviews and validating on 2500 reviews. The optimzer used is adam with the default parameters.
 The model roughly achieves ~86% accuarcy on the validation in the first 15 epochs. (*Note*: A sligthly different architecture with a two stream cnn sentence net performs similarly)
