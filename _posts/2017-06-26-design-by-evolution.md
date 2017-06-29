@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Design by evolution"
-date: 2017-26-6
+date: 2017-06-26
 excerpt: "Evolving neural networks."
 tags: [dnn, evolution, genetic programming, deep learning]
 comments: false
