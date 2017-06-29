@@ -12,6 +12,6 @@ Design by evolution.
 
 The gist (tl;dr): Time to evolve! I’m gonna give a basic example (in PyTorch) of using evolutionary algorithms to tune the hyper-parameters of a DNN.
 
-[Continue reading on Medium...](https://medium.com/@stathis/design-by-evolution-393e41863f98)
+[*Continue reading on Medium...*](https://medium.com/@stathis/design-by-evolution-393e41863f98)
 
-[Project repository](https://github.com/offbit/evo-design).
+[*Project repository*](https://github.com/offbit/evo-design).
